@@ -135,6 +135,14 @@ function check_product()
         echo "Couldn't locate the top of the tree.  Try setting TOP." >&2
         return
     fi
+    if (echo -n $1 | grep -q -e "^pnw_") ; then
+        PNW_BUILD=$(echo -n $1 | sed -e 's/^pnw_//g')
+        export BUILD_NUMBER=$( (date +%s%N ; echo $PNW_BUILD; hostname) | openssl sha1 | sed -e 's/.*=//g; s/ //g' | cut -c1-10 )
+    else
+        PNW_BUILD=
+    fi
+    export PNW_BUILD
+
         TARGET_PRODUCT=$1 \
         TARGET_BUILD_VARIANT= \
         TARGET_BUILD_TYPE= \
@@ -603,6 +611,8 @@ function lunch()
         echo "Invalid lunch combo: $selection"
         return 1
     fi
+
+    check_product $product
 
     TARGET_PRODUCT=$product \
     TARGET_BUILD_VARIANT=$variant \
